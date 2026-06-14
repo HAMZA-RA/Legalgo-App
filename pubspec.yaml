@@ -1,0 +1,42 @@
+﻿name: legalgo_mobile
+description: Production-ready Flutter mobile app for the LegalGo SaaS backend.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.8.0
+  flutter: '>=3.32.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.6.1
+  dio: ^5.8.0+1
+  go_router: ^15.1.2
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+  flutter_secure_storage: ^9.2.4
+  shared_preferences: ^2.5.3
+  file_picker: ^10.1.9
+  mime: ^2.0.0
+  url_launcher: ^6.3.1
+  connectivity_plus: ^6.1.4
+  intl: ^0.20.2
+
+  # Keep payment UI implementation independent from backend checkout strategy.
+  # LegalGo currently returns a Stripe Checkout URL, opened via url_launcher/webview.
+  flutter_stripe: ^13.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.5.4
+  freezed: ^3.0.6
+  json_serializable: ^6.9.5
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/env/

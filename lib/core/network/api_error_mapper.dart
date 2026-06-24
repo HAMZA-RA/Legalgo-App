@@ -1,13 +1,14 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:legalgo_mobile/core/errors/app_exception.dart';
 
 AppException mapDioException(Object error) {
   if (error is DioException) {
     final response = error.response;
     final data = response?.data;
-    final message = _extractMessage(data) ??
+    final message =
+        _extractMessage(data) ??
         error.message ??
-        'Unable to contact the LegalGo server.';
+        'Impossible de contacter le serveur LegalGo.';
     if (response?.statusCode == 401) {
       return UnauthorizedException(message);
     }

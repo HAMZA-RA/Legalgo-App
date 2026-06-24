@@ -39,9 +39,13 @@ Other local runs:  http://localhost:3001/api/v1
 
 Flutter Web against the local backend:
 
-```bash
-flutter run -d chrome
+```powershell
+.\tool\run_web.ps1
 ```
+
+The backend accepts localhost origins on any port outside production while
+retaining its configured allowlist in production. The launcher uses port
+`51822` by default to avoid the Nuxt frontend on port `3000`.
 
 Android emulator against the local backend:
 

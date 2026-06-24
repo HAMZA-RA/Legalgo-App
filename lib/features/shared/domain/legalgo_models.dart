@@ -1,4 +1,4 @@
-﻿// ignore_for_file: prefer_null_aware_operators
+// ignore_for_file: prefer_null_aware_operators
 
 class PaginatedResult<T> {
   const PaginatedResult({
@@ -37,13 +37,17 @@ Map<String, dynamic> unwrapData(Object? json) {
 }
 
 List<Map<String, dynamic>> unwrapList(Object? json) {
-  final data = json is Map<String, dynamic> && json.containsKey('data') ? json['data'] : json;
+  final data = json is Map<String, dynamic> && json.containsKey('data')
+      ? json['data']
+      : json;
   return asJsonList(data);
 }
 
 Map<String, dynamic> asJsonMap(Object? value) {
   if (value is Map<String, dynamic>) return value;
-  if (value is Map) return value.map((key, value) => MapEntry(key.toString(), value));
+  if (value is Map) {
+    return value.map((key, value) => MapEntry(key.toString(), value));
+  }
   return <String, dynamic>{};
 }
 
@@ -71,7 +75,8 @@ String readString(Object? value, {String fallback = ''}) {
   return value.toString();
 }
 
-String? readNullableString(Object? value) => value == null ? null : value.toString();
+String? readNullableString(Object? value) =>
+    value == null ? null : value.toString();
 
 int readInt(Object? value, {int fallback = 0}) {
   if (value == null) return fallback;
@@ -93,6 +98,53 @@ bool readBool(Object? value, {bool fallback = false}) {
 DateTime? readDate(Object? value) {
   if (value == null) return null;
   return DateTime.tryParse(value.toString());
+}
+
+class LegalGoNotification {
+  const LegalGoNotification({
+    required this.id,
+    this.userId,
+    this.roleTarget,
+    this.requestId,
+    required this.type,
+    required this.title,
+    required this.message,
+    this.readAt,
+    required this.createdAt,
+    this.request,
+  });
+
+  final String id;
+  final String? userId;
+  final String? roleTarget;
+  final String? requestId;
+  final String type;
+  final String title;
+  final String message;
+  final DateTime? readAt;
+  final DateTime createdAt;
+  final LegalRequest? request;
+
+  bool get isRead => readAt != null;
+
+  factory LegalGoNotification.fromJson(Map<String, dynamic> json) {
+    return LegalGoNotification(
+      id: readId(json['id']),
+      userId: readNullableId(json['userId'] ?? json['user_id']),
+      roleTarget: readNullableString(json['roleTarget'] ?? json['role_target']),
+      requestId: readNullableId(json['requestId'] ?? json['request_id']),
+      type: readString(json['type']),
+      title: readString(json['title']),
+      message: readString(json['message']),
+      readAt: readDate(json['readAt'] ?? json['read_at']),
+      createdAt:
+          readDate(json['createdAt'] ?? json['created_at']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      request: json['request'] == null
+          ? null
+          : LegalRequest.fromJson(asJsonMap(json['request']), shallow: true),
+    );
+  }
 }
 
 class LegalGoUser {
@@ -117,24 +169,29 @@ class LegalGoUser {
   final List<UserProfile> profiles;
 
   factory LegalGoUser.fromJson(Map<String, dynamic> json) => LegalGoUser(
-        id: readId(json['id']),
-        email: readString(json['email']),
-        phone: readNullableString(json['phone']),
-        role: readString(json['role'], fallback: 'client'),
-        status: readBool(json['status'], fallback: true),
-        createdAt: readDate(json['createdAt'] ?? json['created_at']),
-        requestsCount: json['requestsCount'] == null ? null : readInt(json['requestsCount']),
-        profiles: asJsonList(json['profiles']).map(UserProfile.fromJson).toList(),
-      );
+    id: readId(json['id']),
+    email: readString(json['email']),
+    phone: readNullableString(json['phone']),
+    role: readString(json['role'], fallback: 'client'),
+    status: readBool(json['status'], fallback: true),
+    createdAt: readDate(json['createdAt'] ?? json['created_at']),
+    requestsCount: json['requestsCount'] == null
+        ? null
+        : readInt(json['requestsCount']),
+    profiles: asJsonList(json['profiles']).map(UserProfile.fromJson).toList(),
+  );
 
   String get displayName {
     for (final profile in profiles) {
       final individual = profile.individualProfile;
-      if (individual != null && '${individual.firstname} ${individual.lastname}'.trim().isNotEmpty) {
+      if (individual != null &&
+          '${individual.firstname} ${individual.lastname}'.trim().isNotEmpty) {
         return '${individual.firstname} ${individual.lastname}'.trim();
       }
       final company = profile.companyProfile;
-      if (company != null && company.companyName.isNotEmpty) return company.companyName;
+      if (company != null && company.companyName.isNotEmpty) {
+        return company.companyName;
+      }
     }
     return email;
   }
@@ -156,23 +213,33 @@ class UserProfile {
   final CompanyProfile? companyProfile;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-        id: readId(json['id']),
-        userId: readId(json['userId'] ?? json['user_id']),
-        profileType: readString(json['profileType'] ?? json['profile_type']),
-        individualProfile: json['individualProfile'] == null ? null : IndividualProfile.fromJson(asJsonMap(json['individualProfile'])),
-        companyProfile: json['companyProfile'] == null ? null : CompanyProfile.fromJson(asJsonMap(json['companyProfile'])),
-      );
+    id: readId(json['id']),
+    userId: readId(json['userId'] ?? json['user_id']),
+    profileType: readString(json['profileType'] ?? json['profile_type']),
+    individualProfile: json['individualProfile'] == null
+        ? null
+        : IndividualProfile.fromJson(asJsonMap(json['individualProfile'])),
+    companyProfile: json['companyProfile'] == null
+        ? null
+        : CompanyProfile.fromJson(asJsonMap(json['companyProfile'])),
+  );
 }
 
 class IndividualProfile {
-  const IndividualProfile({required this.id, this.civility, required this.firstname, required this.lastname});
+  const IndividualProfile({
+    required this.id,
+    this.civility,
+    required this.firstname,
+    required this.lastname,
+  });
 
   final String id;
   final String? civility;
   final String firstname;
   final String lastname;
 
-  factory IndividualProfile.fromJson(Map<String, dynamic> json) => IndividualProfile(
+  factory IndividualProfile.fromJson(Map<String, dynamic> json) =>
+      IndividualProfile(
         id: readId(json['id']),
         civility: readNullableString(json['civility']),
         firstname: readString(json['firstname']),
@@ -200,18 +267,23 @@ class CompanyProfile {
   final List<CompanyMember> members;
 
   factory CompanyProfile.fromJson(Map<String, dynamic> json) => CompanyProfile(
-        id: readId(json['id']),
-        companyName: readString(json['companyName'] ?? json['company_name']),
-        legalForm: readNullableString(json['legalForm'] ?? json['legal_form']),
-        siren: readNullableString(json['siren']),
-        vatNumber: readNullableString(json['vatNumber'] ?? json['vat_number']),
-        address: readNullableString(json['address']),
-        members: asJsonList(json['members']).map(CompanyMember.fromJson).toList(),
-      );
+    id: readId(json['id']),
+    companyName: readString(json['companyName'] ?? json['company_name']),
+    legalForm: readNullableString(json['legalForm'] ?? json['legal_form']),
+    siren: readNullableString(json['siren']),
+    vatNumber: readNullableString(json['vatNumber'] ?? json['vat_number']),
+    address: readNullableString(json['address']),
+    members: asJsonList(json['members']).map(CompanyMember.fromJson).toList(),
+  );
 }
 
 class CompanyMember {
-  const CompanyMember({required this.id, required this.fullname, required this.role, required this.percentage});
+  const CompanyMember({
+    required this.id,
+    required this.fullname,
+    required this.role,
+    required this.percentage,
+  });
 
   final String id;
   final String fullname;
@@ -219,21 +291,26 @@ class CompanyMember {
   final String percentage;
 
   factory CompanyMember.fromJson(Map<String, dynamic> json) => CompanyMember(
-        id: readId(json['id']),
-        fullname: readString(json['fullname']),
-        role: readString(json['role']),
-        percentage: readString(json['percentage'], fallback: '0'),
-      );
+    id: readId(json['id']),
+    fullname: readString(json['fullname']),
+    role: readString(json['role']),
+    percentage: readString(json['percentage'], fallback: '0'),
+  );
 }
 
 class ServiceCategorySummary {
-  const ServiceCategorySummary({required this.id, required this.title, required this.slug});
+  const ServiceCategorySummary({
+    required this.id,
+    required this.title,
+    required this.slug,
+  });
 
   final String id;
   final String title;
   final String slug;
 
-  factory ServiceCategorySummary.fromJson(Map<String, dynamic> json) => ServiceCategorySummary(
+  factory ServiceCategorySummary.fromJson(Map<String, dynamic> json) =>
+      ServiceCategorySummary(
         id: readId(json['id']),
         title: readString(json['title']),
         slug: readString(json['slug']),
@@ -261,15 +338,20 @@ class LegalServiceSummary {
   final List<PackSummary> packs;
   final List<ServiceRequiredDocument> requiredDocuments;
 
-  factory LegalServiceSummary.fromJson(Map<String, dynamic> json) => LegalServiceSummary(
+  factory LegalServiceSummary.fromJson(Map<String, dynamic> json) =>
+      LegalServiceSummary(
         id: readId(json['id']),
         title: readString(json['title']),
         slug: readString(json['slug']),
         description: readNullableString(json['description']),
         active: readBool(json['active'], fallback: true),
-        category: json['category'] == null ? null : ServiceCategorySummary.fromJson(asJsonMap(json['category'])),
+        category: json['category'] == null
+            ? null
+            : ServiceCategorySummary.fromJson(asJsonMap(json['category'])),
         packs: asJsonList(json['packs']).map(PackSummary.fromJson).toList(),
-        requiredDocuments: asJsonList(json['requiredDocuments']).map(ServiceRequiredDocument.fromJson).toList(),
+        requiredDocuments: asJsonList(
+          json['requiredDocuments'],
+        ).map(ServiceRequiredDocument.fromJson).toList(),
       );
 }
 
@@ -297,16 +379,18 @@ class PackSummary {
   final bool active;
 
   factory PackSummary.fromJson(Map<String, dynamic> json) => PackSummary(
-        id: readId(json['id']),
-        serviceId: readNullableId(json['serviceId'] ?? json['service_id']),
-        title: readString(json['title']),
-        description: readNullableString(json['description']),
-        price: readString(json['price'], fallback: '0.00'),
-        delayDays: readInt(json['delayDays'] ?? json['delay_days']),
-        benefits: (json['benefits'] is List) ? (json['benefits'] as List).map((item) => item.toString()).toList() : const [],
-        recommended: readBool(json['recommended']),
-        active: readBool(json['active'], fallback: true),
-      );
+    id: readId(json['id']),
+    serviceId: readNullableId(json['serviceId'] ?? json['service_id']),
+    title: readString(json['title']),
+    description: readNullableString(json['description']),
+    price: readString(json['price'], fallback: '0.00'),
+    delayDays: readInt(json['delayDays'] ?? json['delay_days']),
+    benefits: (json['benefits'] is List)
+        ? (json['benefits'] as List).map((item) => item.toString()).toList()
+        : const [],
+    recommended: readBool(json['recommended']),
+    active: readBool(json['active'], fallback: true),
+  );
 }
 
 class ServiceRequiredDocument {
@@ -328,13 +412,17 @@ class ServiceRequiredDocument {
   final bool isRequired;
   final bool active;
 
-  factory ServiceRequiredDocument.fromJson(Map<String, dynamic> json) => ServiceRequiredDocument(
+  factory ServiceRequiredDocument.fromJson(Map<String, dynamic> json) =>
+      ServiceRequiredDocument(
         id: readId(json['id']),
         serviceId: readId(json['serviceId'] ?? json['service_id']),
         title: readString(json['title']),
         category: readString(json['category']),
         description: readNullableString(json['description']),
-        isRequired: readBool(json['isRequired'] ?? json['is_required'], fallback: true),
+        isRequired: readBool(
+          json['isRequired'] ?? json['is_required'],
+          fallback: true,
+        ),
         active: readBool(json['active'], fallback: true),
       );
 }
@@ -384,50 +472,96 @@ class LegalRequest {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  factory LegalRequest.fromJson(Map<String, dynamic> json, {bool shallow = false}) => LegalRequest(
-        id: readId(json['id']),
-        reference: readString(json['reference']),
-        status: readString(json['status']),
-        paymentStatus: readString(json['paymentStatus'] ?? json['payment_status']),
-        currentStep: readInt(json['currentStep'] ?? json['current_step']),
-        totalPrice: readString(json['totalPrice'] ?? json['total_price'], fallback: '0.00'),
-        customerEmail: readNullableString(json['customerEmail'] ?? json['customer_email']),
-        customerPhone: readNullableString(json['customerPhone'] ?? json['customer_phone']),
-        customerFirstname: readNullableString(json['customerFirstname'] ?? json['customer_firstname']),
-        customerLastname: readNullableString(json['customerLastname'] ?? json['customer_lastname']),
-        user: shallow || json['user'] == null ? null : LegalGoUser.fromJson(asJsonMap(json['user'])),
-        service: json['service'] == null ? null : LegalServiceSummary.fromJson(asJsonMap(json['service'])),
-        pack: json['pack'] == null ? null : PackSummary.fromJson(asJsonMap(json['pack'])),
-        answers: shallow ? const [] : asJsonList(json['answers']).map(RequestAnswer.fromJson).toList(),
-        payments: shallow ? const [] : asJsonList(json['payments']).map(Payment.fromJson).toList(),
-        documents: shallow ? const [] : asJsonList(json['documents']).map(LegalDocument.fromJson).toList(),
-        statusHistory: shallow ? const [] : asJsonList(json['statusHistory']).map(RequestStatusHistory.fromJson).toList(),
-        domiciliationSubscription: shallow || json['domiciliationSubscription'] == null
-            ? null
-            : DomiciliationSubscription.fromJson(asJsonMap(json['domiciliationSubscription'])),
-        createdAt: readDate(json['createdAt'] ?? json['created_at']),
-        updatedAt: readDate(json['updatedAt'] ?? json['updated_at']),
-      );
+  factory LegalRequest.fromJson(
+    Map<String, dynamic> json, {
+    bool shallow = false,
+  }) => LegalRequest(
+    id: readId(json['id']),
+    reference: readString(json['reference']),
+    status: readString(json['status']),
+    paymentStatus: readString(json['paymentStatus'] ?? json['payment_status']),
+    currentStep: readInt(json['currentStep'] ?? json['current_step']),
+    totalPrice: readString(
+      json['totalPrice'] ?? json['total_price'],
+      fallback: '0.00',
+    ),
+    customerEmail: readNullableString(
+      json['customerEmail'] ?? json['customer_email'],
+    ),
+    customerPhone: readNullableString(
+      json['customerPhone'] ?? json['customer_phone'],
+    ),
+    customerFirstname: readNullableString(
+      json['customerFirstname'] ?? json['customer_firstname'],
+    ),
+    customerLastname: readNullableString(
+      json['customerLastname'] ?? json['customer_lastname'],
+    ),
+    user: shallow || json['user'] == null
+        ? null
+        : LegalGoUser.fromJson(asJsonMap(json['user'])),
+    service: json['service'] == null
+        ? null
+        : LegalServiceSummary.fromJson(asJsonMap(json['service'])),
+    pack: json['pack'] == null
+        ? null
+        : PackSummary.fromJson(asJsonMap(json['pack'])),
+    answers: shallow
+        ? const []
+        : asJsonList(json['answers']).map(RequestAnswer.fromJson).toList(),
+    payments: shallow
+        ? const []
+        : asJsonList(json['payments']).map(Payment.fromJson).toList(),
+    documents: shallow
+        ? const []
+        : asJsonList(json['documents']).map(LegalDocument.fromJson).toList(),
+    statusHistory: shallow
+        ? const []
+        : asJsonList(
+            json['statusHistory'],
+          ).map(RequestStatusHistory.fromJson).toList(),
+    domiciliationSubscription:
+        shallow || json['domiciliationSubscription'] == null
+        ? null
+        : DomiciliationSubscription.fromJson(
+            asJsonMap(json['domiciliationSubscription']),
+          ),
+    createdAt: readDate(json['createdAt'] ?? json['created_at']),
+    updatedAt: readDate(json['updatedAt'] ?? json['updated_at']),
+  );
 
-  String get customerName => [customerFirstname, customerLastname].whereType<String>().where((part) => part.isNotEmpty).join(' ');
+  String get customerName => [
+    customerFirstname,
+    customerLastname,
+  ].whereType<String>().where((part) => part.isNotEmpty).join(' ');
 }
 
 class RequestAnswer {
-  const RequestAnswer({required this.id, required this.fieldName, this.fieldValue});
+  const RequestAnswer({
+    required this.id,
+    required this.fieldName,
+    this.fieldValue,
+  });
 
   final String id;
   final String fieldName;
   final String? fieldValue;
 
   factory RequestAnswer.fromJson(Map<String, dynamic> json) => RequestAnswer(
-        id: readId(json['id']),
-        fieldName: readString(json['fieldName'] ?? json['field_name']),
-        fieldValue: readNullableString(json['fieldValue'] ?? json['field_value']),
-      );
+    id: readId(json['id']),
+    fieldName: readString(json['fieldName'] ?? json['field_name']),
+    fieldValue: readNullableString(json['fieldValue'] ?? json['field_value']),
+  );
 }
 
 class RequestStatusHistory {
-  const RequestStatusHistory({required this.id, this.oldStatus, required this.newStatus, this.reason, this.createdAt});
+  const RequestStatusHistory({
+    required this.id,
+    this.oldStatus,
+    required this.newStatus,
+    this.reason,
+    this.createdAt,
+  });
 
   final String id;
   final String? oldStatus;
@@ -435,7 +569,8 @@ class RequestStatusHistory {
   final String? reason;
   final DateTime? createdAt;
 
-  factory RequestStatusHistory.fromJson(Map<String, dynamic> json) => RequestStatusHistory(
+  factory RequestStatusHistory.fromJson(Map<String, dynamic> json) =>
+      RequestStatusHistory(
         id: readId(json['id']),
         oldStatus: readNullableString(json['oldStatus'] ?? json['old_status']),
         newStatus: readString(json['newStatus'] ?? json['new_status']),
@@ -482,30 +617,48 @@ class LegalDocument {
   final DateTime? updatedAt;
 
   factory LegalDocument.fromJson(Map<String, dynamic> json) => LegalDocument(
-        id: readId(json['id']),
-        requestId: readId(json['requestId'] ?? json['request_id']),
-        title: readString(json['title']),
-        file: readNullableString(json['file']),
-        originalName: readNullableString(json['originalName'] ?? json['original_name']),
-        mimeType: readNullableString(json['mimeType'] ?? json['mime_type']),
-        sizeBytes: json['sizeBytes'] == null && json['size_bytes'] == null ? null : readInt(json['sizeBytes'] ?? json['size_bytes']),
-        type: readString(json['type']),
-        status: readString(json['status']),
-        rejectionReason: readNullableString(json['rejectionReason'] ?? json['rejection_reason']),
-        requestedMessage: readNullableString(json['requestedMessage'] ?? json['requested_message']),
-        requestedByAdmin: readBool(json['requestedByAdmin'] ?? json['requested_by_admin']),
-        serviceRequiredDocumentId: readNullableId(json['serviceRequiredDocumentId'] ?? json['service_required_document_id']),
-        requiredDocument: json['requiredDocument'] == null ? null : ServiceRequiredDocument.fromJson(asJsonMap(json['requiredDocument'])),
-        createdAt: readDate(json['createdAt'] ?? json['created_at']),
-        updatedAt: readDate(json['updatedAt'] ?? json['updated_at']),
-      );
+    id: readId(json['id']),
+    requestId: readId(json['requestId'] ?? json['request_id']),
+    title: readString(json['title']),
+    file: readNullableString(json['file']),
+    originalName: readNullableString(
+      json['originalName'] ?? json['original_name'],
+    ),
+    mimeType: readNullableString(json['mimeType'] ?? json['mime_type']),
+    sizeBytes: json['sizeBytes'] == null && json['size_bytes'] == null
+        ? null
+        : readInt(json['sizeBytes'] ?? json['size_bytes']),
+    type: readString(json['type']),
+    status: readString(json['status']),
+    rejectionReason: readNullableString(
+      json['rejectionReason'] ?? json['rejection_reason'],
+    ),
+    requestedMessage: readNullableString(
+      json['requestedMessage'] ?? json['requested_message'],
+    ),
+    requestedByAdmin: readBool(
+      json['requestedByAdmin'] ?? json['requested_by_admin'],
+    ),
+    serviceRequiredDocumentId: readNullableId(
+      json['serviceRequiredDocumentId'] ?? json['service_required_document_id'],
+    ),
+    requiredDocument: json['requiredDocument'] == null
+        ? null
+        : ServiceRequiredDocument.fromJson(asJsonMap(json['requiredDocument'])),
+    createdAt: readDate(json['createdAt'] ?? json['created_at']),
+    updatedAt: readDate(json['updatedAt'] ?? json['updated_at']),
+  );
 
   bool get canDownload => file != null && file!.isNotEmpty;
-  String get downloadName => originalName?.isNotEmpty == true ? originalName! : '$title-$id';
+  String get downloadName =>
+      originalName?.isNotEmpty == true ? originalName! : '$title-$id';
 }
 
 class RequestDocumentsPayload {
-  const RequestDocumentsPayload({required this.requiredDocuments, required this.documents});
+  const RequestDocumentsPayload({
+    required this.requiredDocuments,
+    required this.documents,
+  });
 
   final List<ServiceRequiredDocument> requiredDocuments;
   final List<LegalDocument> documents;
@@ -513,8 +666,12 @@ class RequestDocumentsPayload {
   factory RequestDocumentsPayload.fromJson(Object? json) {
     final map = asJsonMap(json);
     return RequestDocumentsPayload(
-      requiredDocuments: asJsonList(map['requiredDocuments']).map(ServiceRequiredDocument.fromJson).toList(),
-      documents: asJsonList(map['documents']).map(LegalDocument.fromJson).toList(),
+      requiredDocuments: asJsonList(
+        map['requiredDocuments'],
+      ).map(ServiceRequiredDocument.fromJson).toList(),
+      documents: asJsonList(
+        map['documents'],
+      ).map(LegalDocument.fromJson).toList(),
     );
   }
 }
@@ -539,18 +696,47 @@ class Payment {
   final LegalRequest? request;
 
   factory Payment.fromJson(Map<String, dynamic> json) => Payment(
-        id: readId(json['id']),
-        requestId: readNullableId(json['requestId'] ?? json['request_id']),
-        amount: readString(json['amount'], fallback: '0.00'),
-        status: readString(json['status']),
-        stripeSessionId: readNullableString(json['stripeSessionId'] ?? json['stripe_session_id']),
-        paymentDate: readDate(json['paymentDate'] ?? json['payment_date']),
-        request: json['request'] == null ? null : LegalRequest.fromJson(asJsonMap(json['request']), shallow: true),
+    id: readId(json['id']),
+    requestId: readNullableId(json['requestId'] ?? json['request_id']),
+    amount: readString(json['amount'], fallback: '0.00'),
+    status: readString(json['status']),
+    stripeSessionId: readNullableString(
+      json['stripeSessionId'] ?? json['stripe_session_id'],
+    ),
+    paymentDate: readDate(json['paymentDate'] ?? json['payment_date']),
+    request: json['request'] == null
+        ? null
+        : LegalRequest.fromJson(asJsonMap(json['request']), shallow: true),
+  );
+}
+
+class CheckoutSession {
+  const CheckoutSession({
+    required this.checkoutUrl,
+    required this.sessionId,
+    required this.requestId,
+  });
+
+  final String checkoutUrl;
+  final String sessionId;
+  final String requestId;
+
+  factory CheckoutSession.fromJson(Map<String, dynamic> json) =>
+      CheckoutSession(
+        checkoutUrl: readString(json['checkoutUrl']),
+        sessionId: readString(json['sessionId']),
+        requestId: readId(json['requestId']),
       );
 }
 
 class DomiciliationPlan {
-  const DomiciliationPlan({required this.id, required this.key, required this.title, required this.amount, required this.durationMonths});
+  const DomiciliationPlan({
+    required this.id,
+    required this.key,
+    required this.title,
+    required this.amount,
+    required this.durationMonths,
+  });
 
   final String id;
   final String key;
@@ -558,24 +744,33 @@ class DomiciliationPlan {
   final String amount;
   final int durationMonths;
 
-  factory DomiciliationPlan.fromJson(Map<String, dynamic> json) => DomiciliationPlan(
+  factory DomiciliationPlan.fromJson(Map<String, dynamic> json) =>
+      DomiciliationPlan(
         id: readId(json['id']),
         key: readString(json['key']),
         title: readString(json['title']),
         amount: readString(json['amount'], fallback: '0.00'),
-        durationMonths: readInt(json['durationMonths'] ?? json['duration_months']),
+        durationMonths: readInt(
+          json['durationMonths'] ?? json['duration_months'],
+        ),
       );
 }
 
 class SubscriptionPayment {
-  const SubscriptionPayment({required this.id, required this.amount, required this.status, this.paidAt});
+  const SubscriptionPayment({
+    required this.id,
+    required this.amount,
+    required this.status,
+    this.paidAt,
+  });
 
   final String id;
   final String amount;
   final String status;
   final DateTime? paidAt;
 
-  factory SubscriptionPayment.fromJson(Map<String, dynamic> json) => SubscriptionPayment(
+  factory SubscriptionPayment.fromJson(Map<String, dynamic> json) =>
+      SubscriptionPayment(
         id: readId(json['id']),
         amount: readString(json['amount'], fallback: '0.00'),
         status: readString(json['status']),
@@ -614,20 +809,32 @@ class DomiciliationSubscription {
   final LegalRequest? request;
   final List<SubscriptionPayment> payments;
 
-  factory DomiciliationSubscription.fromJson(Map<String, dynamic> json) => DomiciliationSubscription(
+  factory DomiciliationSubscription.fromJson(Map<String, dynamic> json) =>
+      DomiciliationSubscription(
         id: readId(json['id']),
         formula: readString(json['formula']),
         amount: readNullableString(json['amount']),
-        monthlyPrice: readString(json['monthlyPrice'] ?? json['monthly_price'], fallback: '0.00'),
-        plan: json['plan'] == null ? null : DomiciliationPlan.fromJson(asJsonMap(json['plan'])),
+        monthlyPrice: readString(
+          json['monthlyPrice'] ?? json['monthly_price'],
+          fallback: '0.00',
+        ),
+        plan: json['plan'] == null
+            ? null
+            : DomiciliationPlan.fromJson(asJsonMap(json['plan'])),
         startDate: readNullableString(json['startDate'] ?? json['start_date']),
         endDate: readNullableString(json['endDate'] ?? json['end_date']),
         expiresAt: readNullableString(json['expiresAt'] ?? json['expires_at']),
         renewalDate: readString(json['renewalDate'] ?? json['renewal_date']),
         status: readString(json['status']),
-        user: json['user'] == null ? null : LegalGoUser.fromJson(asJsonMap(json['user'])),
-        request: json['request'] == null ? null : LegalRequest.fromJson(asJsonMap(json['request']), shallow: true),
-        payments: asJsonList(json['payments']).map(SubscriptionPayment.fromJson).toList(),
+        user: json['user'] == null
+            ? null
+            : LegalGoUser.fromJson(asJsonMap(json['user'])),
+        request: json['request'] == null
+            ? null
+            : LegalRequest.fromJson(asJsonMap(json['request']), shallow: true),
+        payments: asJsonList(
+          json['payments'],
+        ).map(SubscriptionPayment.fromJson).toList(),
       );
 
   String get displayAmount => plan?.amount ?? amount ?? monthlyPrice;
@@ -635,7 +842,12 @@ class DomiciliationSubscription {
 }
 
 class AdminStats {
-  const AdminStats({required this.users, required this.requests, required this.subscriptions, required this.paidRevenue});
+  const AdminStats({
+    required this.users,
+    required this.requests,
+    required this.subscriptions,
+    required this.paidRevenue,
+  });
 
   final int users;
   final int requests;
@@ -643,11 +855,11 @@ class AdminStats {
   final String paidRevenue;
 
   factory AdminStats.fromJson(Map<String, dynamic> json) => AdminStats(
-        users: readInt(json['users']),
-        requests: readInt(json['requests']),
-        subscriptions: readInt(json['subscriptions']),
-        paidRevenue: readString(json['paidRevenue'], fallback: '0.00'),
-      );
+    users: readInt(json['users']),
+    requests: readInt(json['requests']),
+    subscriptions: readInt(json['subscriptions']),
+    paidRevenue: readString(json['paidRevenue'], fallback: '0.00'),
+  );
 }
 
 class AdminDashboardStats {
@@ -665,23 +877,35 @@ class AdminDashboardStats {
   final DomiciliationStats domiciliationStats;
   final DashboardAlerts alerts;
 
-  factory AdminDashboardStats.fromJson(Map<String, dynamic> json) => AdminDashboardStats(
+  factory AdminDashboardStats.fromJson(Map<String, dynamic> json) =>
+      AdminDashboardStats(
         summary: AdminStats.fromJson(asJsonMap(json['summary'])),
-        requestsEvolution: asJsonList(json['requestsEvolution']).map(DashboardBucket.fromJson).toList(),
-        servicesDistribution: asJsonList(json['servicesDistribution']).map(ServiceDistribution.fromJson).toList(),
-        domiciliationStats: DomiciliationStats.fromJson(asJsonMap(json['domiciliationStats'])),
+        requestsEvolution: asJsonList(
+          json['requestsEvolution'],
+        ).map(DashboardBucket.fromJson).toList(),
+        servicesDistribution: asJsonList(
+          json['servicesDistribution'],
+        ).map(ServiceDistribution.fromJson).toList(),
+        domiciliationStats: DomiciliationStats.fromJson(
+          asJsonMap(json['domiciliationStats']),
+        ),
         alerts: DashboardAlerts.fromJson(asJsonMap(json['alerts'])),
       );
 }
 
 class DashboardBucket {
-  const DashboardBucket({required this.label, required this.date, required this.count});
+  const DashboardBucket({
+    required this.label,
+    required this.date,
+    required this.count,
+  });
 
   final String label;
   final String date;
   final int count;
 
-  factory DashboardBucket.fromJson(Map<String, dynamic> json) => DashboardBucket(
+  factory DashboardBucket.fromJson(Map<String, dynamic> json) =>
+      DashboardBucket(
         label: readString(json['label']),
         date: readString(json['date']),
         count: readInt(json['count']),
@@ -689,16 +913,23 @@ class DashboardBucket {
 }
 
 class ServiceDistribution {
-  const ServiceDistribution({required this.label, required this.count, required this.percentage});
+  const ServiceDistribution({
+    required this.label,
+    required this.count,
+    required this.percentage,
+  });
 
   final String label;
   final int count;
   final num percentage;
 
-  factory ServiceDistribution.fromJson(Map<String, dynamic> json) => ServiceDistribution(
+  factory ServiceDistribution.fromJson(Map<String, dynamic> json) =>
+      ServiceDistribution(
         label: readString(json['label']),
         count: readInt(json['count']),
-        percentage: json['percentage'] is num ? json['percentage'] as num : num.tryParse(readString(json['percentage'])) ?? 0,
+        percentage: json['percentage'] is num
+            ? json['percentage'] as num
+            : num.tryParse(readString(json['percentage'])) ?? 0,
       );
 }
 
@@ -717,28 +948,43 @@ class DomiciliationStats {
   final num generatedAmount;
   final List<DomiciliationFormulaStat> formulas;
 
-  factory DomiciliationStats.fromJson(Map<String, dynamic> json) => DomiciliationStats(
+  factory DomiciliationStats.fromJson(Map<String, dynamic> json) =>
+      DomiciliationStats(
         active: readInt(json['active']),
         expired: readInt(json['expired']),
         renewingSoon: readInt(json['renewingSoon']),
-        generatedAmount: json['generatedAmount'] is num ? json['generatedAmount'] as num : num.tryParse(readString(json['generatedAmount'])) ?? 0,
-        formulas: asJsonList(json['formulas']).map(DomiciliationFormulaStat.fromJson).toList(),
+        generatedAmount: json['generatedAmount'] is num
+            ? json['generatedAmount'] as num
+            : num.tryParse(readString(json['generatedAmount'])) ?? 0,
+        formulas: asJsonList(
+          json['formulas'],
+        ).map(DomiciliationFormulaStat.fromJson).toList(),
       );
 }
 
 class DomiciliationFormulaStat {
-  const DomiciliationFormulaStat({required this.formula, required this.count, required this.amount, required this.percentage});
+  const DomiciliationFormulaStat({
+    required this.formula,
+    required this.count,
+    required this.amount,
+    required this.percentage,
+  });
 
   final String formula;
   final int count;
   final num amount;
   final num percentage;
 
-  factory DomiciliationFormulaStat.fromJson(Map<String, dynamic> json) => DomiciliationFormulaStat(
+  factory DomiciliationFormulaStat.fromJson(Map<String, dynamic> json) =>
+      DomiciliationFormulaStat(
         formula: readString(json['formula']),
         count: readInt(json['count']),
-        amount: json['amount'] is num ? json['amount'] as num : num.tryParse(readString(json['amount'])) ?? 0,
-        percentage: json['percentage'] is num ? json['percentage'] as num : num.tryParse(readString(json['percentage'])) ?? 0,
+        amount: json['amount'] is num
+            ? json['amount'] as num
+            : num.tryParse(readString(json['amount'])) ?? 0,
+        percentage: json['percentage'] is num
+            ? json['percentage'] as num
+            : num.tryParse(readString(json['percentage'])) ?? 0,
       );
 }
 
@@ -757,7 +1003,8 @@ class DashboardAlerts {
   final int untreatedRequests;
   final int pendingPaymentRequests;
 
-  factory DashboardAlerts.fromJson(Map<String, dynamic> json) => DashboardAlerts(
+  factory DashboardAlerts.fromJson(Map<String, dynamic> json) =>
+      DashboardAlerts(
         failedPayments: readInt(json['failedPayments']),
         pendingPayments: readInt(json['pendingPayments']),
         expiringSubscriptions: readInt(json['expiringSubscriptions']),
@@ -765,4 +1012,3 @@ class DashboardAlerts {
         pendingPaymentRequests: readInt(json['pendingPaymentRequests']),
       );
 }
-

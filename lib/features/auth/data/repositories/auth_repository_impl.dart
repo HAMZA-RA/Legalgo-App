@@ -1,4 +1,4 @@
-﻿import 'package:legalgo_mobile/core/network/api_error_mapper.dart';
+import 'package:legalgo_mobile/core/network/api_error_mapper.dart';
 import 'package:legalgo_mobile/core/storage/secure_token_storage.dart';
 import 'package:legalgo_mobile/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:legalgo_mobile/features/auth/data/dtos/auth_dtos.dart';
@@ -10,8 +10,8 @@ class AuthRepositoryImpl implements AuthRepository {
   const AuthRepositoryImpl({
     required AuthRemoteDataSource remoteDataSource,
     required SecureTokenStorage tokenStorage,
-  })  : _remoteDataSource = remoteDataSource,
-        _tokenStorage = tokenStorage;
+  }) : _remoteDataSource = remoteDataSource,
+       _tokenStorage = tokenStorage;
 
   final AuthRemoteDataSource _remoteDataSource;
   final SecureTokenStorage _tokenStorage;
@@ -59,9 +59,20 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthSession> refresh(String refreshToken) async {
     try {
-      final session = (await _remoteDataSource.refresh(refreshToken)).toDomain();
+      final session = (await _remoteDataSource.refresh(
+        refreshToken,
+      )).toDomain();
       await _persist(session);
       return session;
+    } catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
+  @override
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _remoteDataSource.forgotPassword(email.trim());
     } catch (error) {
       throw mapDioException(error);
     }
@@ -100,4 +111,3 @@ class AuthRepositoryImpl implements AuthRepository {
     await _tokenStorage.saveCachedUser(session.user);
   }
 }
-

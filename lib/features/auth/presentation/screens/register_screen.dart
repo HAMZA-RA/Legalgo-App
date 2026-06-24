@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:legalgo_mobile/core/widgets/legalgo_mark.dart';
@@ -45,11 +45,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const LegalGoMark(),
                     const SizedBox(height: 32),
                     Text(
-                      'Create account',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+                      'Créer un compte',
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 8),
-                    const Text('Start tracking your LegalGo service requests from your phone.'),
+                    const Text(
+                      'Suivez vos demandes LegalGo depuis votre téléphone.',
+                    ),
                     const SizedBox(height: 28),
                     TextFormField(
                       controller: _emailController,
@@ -61,7 +64,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                       validator: (value) {
                         final email = value?.trim() ?? '';
-                        if (email.isEmpty || !email.contains('@')) return 'Enter a valid email';
+                        if (email.isEmpty || !email.contains('@')) {
+                          return 'Saisissez une adresse email valide';
+                        }
                         return null;
                       },
                     ),
@@ -71,7 +76,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       keyboardType: TextInputType.phone,
                       autofillHints: const [AutofillHints.telephoneNumber],
                       decoration: const InputDecoration(
-                        labelText: 'Phone optional',
+                        labelText: 'Téléphone facultatif',
                         prefixIcon: Icon(Icons.phone_outlined),
                       ),
                     ),
@@ -81,22 +86,37 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       obscureText: _obscurePassword,
                       autofillHints: const [AutofillHints.newPassword],
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: 'Mot de passe',
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
-                          tooltip: _obscurePassword ? 'Show password' : 'Hide password',
-                          icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          tooltip: _obscurePassword
+                              ? 'Afficher le mot de passe'
+                              : 'Masquer le mot de passe',
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                       ),
                       validator: (value) {
-                        if ((value ?? '').length < 10) return 'Password must be at least 10 characters';
+                        if ((value ?? '').length < 10) {
+                          return 'Le mot de passe doit contenir au moins 10 caractères';
+                        }
                         return null;
                       },
                     ),
                     if (authState.errorMessage != null) ...[
                       const SizedBox(height: 16),
-                      Text(authState.errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                      Text(
+                        authState.errorMessage!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
                     ],
                     const SizedBox(height: 24),
                     FilledButton.icon(
@@ -107,12 +127,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.person_add_alt_rounded),
-                      label: const Text('Create account'),
+                      label: const Text('Créer un compte'),
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton(
-                      onPressed: authState.isLoading ? null : () => context.go('/login'),
-                      child: const Text('I already have an account'),
+                      onPressed: authState.isLoading
+                          ? null
+                          : () => context.go('/login'),
+                      child: const Text('J’ai déjà un compte'),
                     ),
                   ],
                 ),
@@ -127,15 +149,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     try {
-      await ref.read(authControllerProvider.notifier).register(
+      await ref
+          .read(authControllerProvider.notifier)
+          .register(
             email: _emailController.text,
             password: _passwordController.text,
             phone: _phoneController.text,
           );
     } catch (_) {
-      // The controller stores a user-facing error in state.
+      // Le contrôleur conserve le message d’erreur affiché.
     }
   }
 }
-
-

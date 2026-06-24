@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:legalgo_mobile/features/admin/dashboard/presentation/screens/admin_dashboard_screen.dart';
@@ -16,6 +16,7 @@ import 'package:legalgo_mobile/features/auth/presentation/screens/splash_screen.
 import 'package:legalgo_mobile/features/client/dashboard/presentation/screens/client_dashboard_screen.dart';
 import 'package:legalgo_mobile/features/client/shell/presentation/screens/client_shell_screen.dart';
 import 'package:legalgo_mobile/features/documents/presentation/screens/client_documents_screen.dart';
+import 'package:legalgo_mobile/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:legalgo_mobile/features/payments/presentation/screens/client_payments_screen.dart';
 import 'package:legalgo_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:legalgo_mobile/features/requests/presentation/screens/client_requests_screen.dart';
@@ -41,7 +42,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       final role = auth.user?.role;
       if (path == '/splash' || publicRoutes.contains(path)) {
-        return role == UserRole.admin ? '/admin/dashboard' : '/client/dashboard';
+        return role == UserRole.admin
+            ? '/admin/dashboard'
+            : '/client/dashboard';
       }
 
       if (path == '/client/home') {
@@ -75,10 +78,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const RegisterScreen(),
       ),
       ShellRoute(
-        builder: (context, state, child) => ClientShellScreen(
-          currentPath: state.uri.path,
-          child: child,
-        ),
+        builder: (context, state, child) =>
+            ClientShellScreen(currentPath: state.uri.path, child: child),
         routes: [
           GoRoute(
             path: '/client/home',
@@ -114,6 +115,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const ClientPaymentsScreen(),
           ),
           GoRoute(
+            path: '/client/notifications',
+            name: 'client-notifications',
+            builder: (context, state) =>
+                const NotificationsScreen(admin: false),
+          ),
+          GoRoute(
             path: '/client/profile',
             name: 'client-profile',
             builder: (context, state) => const ProfileScreen(),
@@ -126,10 +133,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
       ShellRoute(
-        builder: (context, state, child) => AdminShellScreen(
-          currentPath: state.uri.path,
-          child: child,
-        ),
+        builder: (context, state, child) =>
+            AdminShellScreen(currentPath: state.uri.path, child: child),
         routes: [
           GoRoute(
             path: '/admin/dashboard',
@@ -160,6 +165,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const AdminPaymentsScreen(),
           ),
           GoRoute(
+            path: '/admin/notifications',
+            name: 'admin-notifications',
+            builder: (context, state) => const NotificationsScreen(admin: true),
+          ),
+          GoRoute(
             path: '/admin/subscriptions',
             name: 'admin-subscriptions',
             builder: (context, state) => const AdminSubscriptionsScreen(),
@@ -179,7 +189,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('LegalGo')),
-      body: Center(child: Text(state.error?.message ?? 'Route not found')),
+      body: Center(child: Text(state.error?.message ?? 'Page introuvable')),
     ),
   );
 });

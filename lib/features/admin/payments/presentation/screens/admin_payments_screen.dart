@@ -1,6 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:legalgo_mobile/core/design_system/design_system.dart';
 import 'package:legalgo_mobile/core/widgets/state_views.dart';
+import 'package:legalgo_mobile/features/shared/domain/legalgo_models.dart';
 import 'package:legalgo_mobile/features/shared/presentation/providers/legalgo_providers.dart';
 import 'package:legalgo_mobile/features/shared/presentation/widgets/portal_widgets.dart';
 
@@ -8,64 +10,185 @@ class AdminPaymentsScreen extends ConsumerStatefulWidget {
   const AdminPaymentsScreen({super.key});
 
   @override
-  ConsumerState<AdminPaymentsScreen> createState() => _AdminPaymentsScreenState();
+  ConsumerState<AdminPaymentsScreen> createState() =>
+      _AdminPaymentsScreenState();
 }
 
 class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
-  final _search = TextEditingController();
-  String? _status;
   int _page = 1;
-  AdminPaymentsQuery get _query => AdminPaymentsQuery(search: _search.text, status: _status, page: _page);
 
-  @override
-  void dispose() {
-    _search.dispose();
-    super.dispose();
-  }
+  AdminPaymentsQuery get _query => AdminPaymentsQuery(page: _page);
 
   @override
   Widget build(BuildContext context) {
     final paymentsAsync = ref.watch(adminPaymentsProvider(_query));
     return Scaffold(
-      appBar: AppBar(title: const Text('Payments')),
-      body: Column(children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(children: [
-            Expanded(child: TextField(controller: _search, decoration: const InputDecoration(prefixIcon: Icon(Icons.search), labelText: 'Search payments'), onSubmitted: (_) => setState(() => _page = 1))),
-            const SizedBox(width: 10),
-            SizedBox(width: 150, child: DropdownButtonFormField<String?>(value: _status, decoration: const InputDecoration(labelText: 'Status'), items: const [DropdownMenuItem(value: null, child: Text('All')), DropdownMenuItem(value: 'pending', child: Text('Pending')), DropdownMenuItem(value: 'paid', child: Text('Paid')), DropdownMenuItem(value: 'failed', child: Text('Failed'))], onChanged: (value) => setState(() { _status = value; _page = 1; }))),
-          ]),
+      backgroundColor: AppColors.pageBackground(context),
+      appBar: const PremiumAppBar(title: 'Paiements'),
+      body: paymentsAsync.when(
+        loading: () => const LoadingView(message: 'Chargement des paiements'),
+        error: (error, _) => ErrorStateView(
+          message: error.toString(),
+          onRetry: () => ref.invalidate(adminPaymentsProvider(_query)),
         ),
-        Expanded(
-          child: paymentsAsync.when(
-            loading: () => const LoadingView(message: 'Loading payments'),
-            error: (error, _) => ErrorStateView(message: error.toString(), onRetry: () => ref.invalidate(adminPaymentsProvider(_query))),
-            data: (page) => RefreshIndicator(
-              onRefresh: () async => ref.invalidate(adminPaymentsProvider(_query)),
-              child: page.items.isEmpty
-                  ? const EmptyStateView(icon: Icons.payments_outlined, title: 'No payments', message: 'No payments match the selected filters.')
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      itemCount: page.items.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == page.items.length) {
-                          return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                            Text('Page ${page.page} of ${page.totalPages}'),
-                            Row(children: [
-                              IconButton(onPressed: page.page <= 1 ? null : () => setState(() => _page--), icon: const Icon(Icons.chevron_left)),
-                              IconButton(onPressed: page.page >= page.totalPages ? null : () => setState(() => _page++), icon: const Icon(Icons.chevron_right)),
-                            ]),
-                          ]);
-                        }
-                        final payment = page.items[index];
-                        return Card(child: ListTile(leading: const Icon(Icons.credit_card_rounded), title: Text(money(payment.amount)), subtitle: Text('${payment.request?.reference ?? 'No reference'} • ${payment.stripeSessionId ?? 'No Stripe session'}'), trailing: StatusChip(value: payment.status)));
-                      },
-                    ),
+        data: (page) => RefreshIndicator(
+          onRefresh: () async => ref.invalidate(adminPaymentsProvider(_query)),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenHorizontal,
+              AppSpacing.xs,
+              AppSpacing.screenHorizontal,
+              AppSpacing.screenBottom,
             ),
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 980),
+                  child: Column(
+                    children: [
+                      if (page.items.isEmpty)
+                        const AppCard(
+                          child: EmptyStateView(
+                            icon: Icons.payments_outlined,
+                            title: 'Aucun paiement',
+                            message: 'Aucun paiement disponible.',
+                          ),
+                        )
+                      else ...[
+                        for (final payment in page.items) ...[
+                          _PaymentCard(payment: payment),
+                          const SizedBox(height: AppSpacing.sm),
+                        ],
+                        _Pagination(
+                          page: page.page,
+                          totalPages: page.totalPages,
+                          onPrevious: page.page <= 1
+                              ? null
+                              : () => setState(() => _page--),
+                          onNext: page.page >= page.totalPages
+                              ? null
+                              : () => setState(() => _page++),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ]),
+      ),
     );
   }
+}
+
+class _PaymentCard extends StatelessWidget {
+  const _PaymentCard({required this.payment});
+
+  final Payment payment;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: AppColors.softIndigo.withValues(alpha: .10),
+              borderRadius: AppRadius.icon,
+            ),
+            child: const Icon(
+              Icons.credit_card_rounded,
+              color: AppColors.softIndigo,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        money(payment.amount),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    StatusBadge(value: payment.status, compact: true),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  payment.request?.reference ?? 'Aucune référence',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  payment.stripeSessionId ?? 'Aucune session Stripe',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Pagination extends StatelessWidget {
+  const _Pagination({
+    required this.page,
+    required this.totalPages,
+    required this.onPrevious,
+    required this.onNext,
+  });
+
+  final int page;
+  final int totalPages;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
+
+  @override
+  Widget build(BuildContext context) => AppCard(
+    shadows: AppShadows.none,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Page $page sur $totalPages',
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        Row(
+          children: [
+            IconButton(
+              onPressed: onPrevious,
+              icon: const Icon(Icons.chevron_left),
+            ),
+            IconButton(
+              onPressed: onNext,
+              icon: const Icon(Icons.chevron_right),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 }

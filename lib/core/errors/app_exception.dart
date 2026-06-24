@@ -10,5 +10,5 @@
 }
 
 class UnauthorizedException extends AppException {
-  const UnauthorizedException([super.message = 'Session expired']);
+  const UnauthorizedException([super.message = 'Session expirée']);
 }

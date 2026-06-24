@@ -1,4 +1,4 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:legalgo_mobile/core/network/api_envelope.dart';
 import 'package:legalgo_mobile/features/auth/data/dtos/auth_dtos.dart';
 import 'package:legalgo_mobile/features/auth/domain/entities/auth_user.dart';
@@ -9,7 +9,10 @@ class AuthRemoteDataSource {
   final Dio _dio;
 
   Future<AuthResponseDto> login(LoginRequestDto dto) async {
-    final response = await _dio.post<Object?>('/auth/login', data: dto.toJson());
+    final response = await _dio.post<Object?>(
+      '/auth/login',
+      data: dto.toJson(),
+    );
     return ApiEnvelope.unwrap(
       response.data,
       (data) => AuthResponseDto.fromJson(data as Map<String, dynamic>),
@@ -17,7 +20,10 @@ class AuthRemoteDataSource {
   }
 
   Future<AuthResponseDto> register(RegisterRequestDto dto) async {
-    final response = await _dio.post<Object?>('/auth/register', data: dto.toJson());
+    final response = await _dio.post<Object?>(
+      '/auth/register',
+      data: dto.toJson(),
+    );
     return ApiEnvelope.unwrap(
       response.data,
       (data) => AuthResponseDto.fromJson(data as Map<String, dynamic>),
@@ -33,6 +39,10 @@ class AuthRemoteDataSource {
       response.data,
       (data) => AuthResponseDto.fromJson(data as Map<String, dynamic>),
     );
+  }
+
+  Future<void> forgotPassword(String email) async {
+    await _dio.post<Object?>('/auth/forgot-password', data: {'email': email});
   }
 
   Future<AuthUser> me() async {

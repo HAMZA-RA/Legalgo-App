@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:legalgo_mobile/core/design_system/design_system.dart';
 import 'package:legalgo_mobile/core/widgets/state_views.dart';
 import 'package:legalgo_mobile/features/shared/domain/legalgo_models.dart';
 import 'package:legalgo_mobile/features/shared/presentation/providers/legalgo_providers.dart';
@@ -13,22 +14,97 @@ class ClientRequestsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final requestsAsync = ref.watch(clientRequestsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('My Requests')),
+      backgroundColor: AppColors.pageBackground(context),
+      appBar: const PremiumAppBar(title: 'Demandes'),
       body: requestsAsync.when(
-        loading: () => const LoadingView(message: 'Loading requests'),
-        error: (error, _) => ErrorStateView(message: error.toString(), onRetry: () => ref.invalidate(clientRequestsProvider)),
-        data: (requests) => RefreshIndicator(
-          onRefresh: () async => ref.invalidate(clientRequestsProvider),
-          child: requests.isEmpty
-              ? const EmptyStateView(icon: Icons.folder_open_outlined, title: 'No requests', message: 'Your LegalGo request history is empty.')
-              : ListView.separated(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: requests.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) => _RequestCard(request: requests[index]),
-                ),
+        loading: () => const LoadingView(message: 'Chargement des demandes'),
+        error: (error, _) => ErrorStateView(
+          message: error.toString(),
+          onRetry: () => ref.invalidate(clientRequestsProvider),
         ),
+        data: (requests) {
+          return RefreshIndicator(
+            onRefresh: () async => ref.invalidate(clientRequestsProvider),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenHorizontal,
+                AppSpacing.xs,
+                AppSpacing.screenHorizontal,
+                AppSpacing.screenBottom,
+              ),
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 940),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SectionHeader(
+                          title: 'Historique',
+                          subtitle:
+                              '${requests.length} demande(s) liée(s) à votre compte',
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        if (requests.isEmpty)
+                          const AppCard(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: AppSpacing.xl,
+                              vertical: AppSpacing.xxxl,
+                            ),
+                            child: EmptyStateView(
+                              icon: Icons.folder_open_outlined,
+                              title: 'Aucune demande',
+                              message:
+                                  'Votre historique de demandes LegalGo est vide.',
+                            ),
+                          )
+                        else
+                          _RequestList(requests: requests),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
+    );
+  }
+}
+
+class _RequestList extends StatelessWidget {
+  const _RequestList({required this.requests});
+
+  final List<LegalRequest> requests;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoColumns = constraints.maxWidth >= 820;
+        if (!twoColumns) {
+          return Column(
+            children: [
+              for (final request in requests) ...[
+                _RequestCard(request: request),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+            ],
+          );
+        }
+        return Wrap(
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.md,
+          children: [
+            for (final request in requests)
+              SizedBox(
+                width: (constraints.maxWidth - AppSpacing.md) / 2,
+                child: _RequestCard(request: request),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -40,31 +116,98 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => context.go('/client/requests/${request.id}'),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      onTap: () => context.go('/client/requests/${request.id}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(child: Text(request.reference, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
-                  const Icon(Icons.chevron_right_rounded),
-                ],
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.softIndigo.withValues(alpha: .10),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                ),
+                child: const Icon(
+                  Icons.description_outlined,
+                  color: AppColors.softIndigo,
+                  size: 18,
+                ),
               ),
-              const SizedBox(height: 8),
-              Text(request.service?.title ?? 'Service unavailable'),
-              Text(request.pack?.title ?? 'No pack', style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(height: 12),
-              Wrap(spacing: 8, runSpacing: 8, children: [StatusChip(value: request.status), StatusChip(value: request.paymentStatus)]),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      request.reference,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      request.service?.title ?? 'Service indisponible',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 132),
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: [
+                    StatusBadge(value: request.status, compact: true),
+                    StatusBadge(value: request.paymentStatus, compact: true),
+                  ],
+                ),
+              ),
             ],
           ),
-        ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  request.pack?.title ?? 'Aucun pack',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              ),
+              Text(
+                money(request.totalPrice),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.navy,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xxs),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textMuted,
+                size: 20,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
-

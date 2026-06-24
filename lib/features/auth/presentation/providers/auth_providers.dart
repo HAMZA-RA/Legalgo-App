@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:legalgo_mobile/core/providers/core_providers.dart';
 import 'package:legalgo_mobile/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:legalgo_mobile/features/auth/data/dtos/auth_dtos.dart';
@@ -17,10 +17,11 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   );
 });
 
-final authControllerProvider =
-    StateNotifierProvider<AuthController, AuthState>((ref) {
-  return AuthController(ref.watch(authRepositoryProvider));
-});
+final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
+  (ref) {
+    return AuthController(ref.watch(authRepositoryProvider));
+  },
+);
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
@@ -33,17 +34,18 @@ class AuthState {
   });
 
   const AuthState.unknown()
-      : status = AuthStatus.unknown,
-        user = null,
-        isLoading = false,
-        errorMessage = null;
+    : status = AuthStatus.unknown,
+      user = null,
+      isLoading = false,
+      errorMessage = null;
 
   final AuthStatus status;
   final AuthUser? user;
   final bool isLoading;
   final String? errorMessage;
 
-  bool get isAuthenticated => status == AuthStatus.authenticated && user != null;
+  bool get isAuthenticated =>
+      status == AuthStatus.authenticated && user != null;
   bool get isAdmin => user?.role == UserRole.admin;
 
   AuthState copyWith({
@@ -124,6 +126,10 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> forgotPassword(String email) {
+    return _repository.forgotPassword(email.trim());
+  }
+
   Future<void> logout() async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -133,4 +139,3 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 }
-

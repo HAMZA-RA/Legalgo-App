@@ -1,7 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class LoadingView extends StatelessWidget {
-  const LoadingView({super.key, this.message = 'Loading'});
+  const LoadingView({super.key, this.message = 'Chargement'});
 
   final String message;
 
@@ -44,7 +44,11 @@ class EmptyStateView extends StatelessWidget {
           children: [
             Icon(icon, size: 48, color: scheme.secondary),
             const SizedBox(height: 16),
-            Text(title, style: textTheme.titleMedium, textAlign: TextAlign.center),
+            Text(
+              title,
+              style: textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
             Text(message, textAlign: TextAlign.center),
           ],
@@ -68,12 +72,19 @@ class ErrorStateView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 48),
+            Icon(
+              Icons.error_outline,
+              color: Theme.of(context).colorScheme.error,
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(message, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              OutlinedButton(onPressed: onRetry, child: const Text('Try again')),
+              OutlinedButton(
+                onPressed: onRetry,
+                child: const Text('Réessayer'),
+              ),
             ],
           ],
         ),

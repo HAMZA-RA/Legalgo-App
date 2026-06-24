@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 String money(String? value) {
   final amount = num.tryParse(value ?? '') ?? 0;
@@ -13,23 +13,61 @@ String compactDate(DateTime? value) {
   return '${local.year}-$month-$day';
 }
 
-String humanStatus(String value) => value.replaceAll('_', ' ').split(' ').map((part) {
-      if (part.isEmpty) return part;
-      return '${part[0].toUpperCase()}${part.substring(1)}';
-    }).join(' ');
+String humanStatus(String value) {
+  const labels = {
+    'active': 'Actif',
+    'inactive': 'Inactif',
+    'paid': 'Payé',
+    'pending': 'En attente',
+    'pending_payment': 'Paiement en attente',
+    'failed': 'Échoué',
+    'cancelled': 'Annulé',
+    'completed': 'Terminé',
+    'processing': 'En traitement',
+    'documents_requested': 'Documents demandés',
+    'documents_received': 'Documents reçus',
+    'validated': 'Validé',
+    'rejected': 'Rejeté',
+    'expired': 'Expiré',
+    'past_due': 'En retard',
+    'official_available': 'Document officiel disponible',
+    'sent': 'Envoyé',
+    'draft': 'Brouillon',
+    'created': 'Création',
+  };
+  final normalized = value.toLowerCase().trim();
+  return labels[normalized] ??
+      normalized
+          .replaceAll('_', ' ')
+          .split(' ')
+          .map((part) {
+            if (part.isEmpty) return part;
+            return '${part[0].toUpperCase()}${part.substring(1)}';
+          })
+          .join(' ');
+}
 
 Color statusColor(BuildContext context, String value) {
   final scheme = Theme.of(context).colorScheme;
   return switch (value) {
     'paid' || 'completed' || 'validated' || 'active' => Colors.green.shade700,
-    'pending' || 'pending_payment' || 'documents_requested' || 'past_due' => Colors.orange.shade800,
+    'pending' ||
+    'pending_payment' ||
+    'documents_requested' ||
+    'past_due' => Colors.orange.shade800,
     'failed' || 'rejected' || 'cancelled' || 'expired' => scheme.error,
     _ => scheme.primary,
   };
 }
 
 class MetricTile extends StatelessWidget {
-  const MetricTile({super.key, required this.title, required this.value, required this.icon, this.subtitle});
+  const MetricTile({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.icon,
+    this.subtitle,
+  });
 
   final String title;
   final String value;
@@ -47,7 +85,12 @@ class MetricTile extends StatelessWidget {
           children: [
             Icon(icon, color: scheme.primary),
             const SizedBox(height: 14),
-            Text(value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+            Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
             const SizedBox(height: 4),
             Text(title, style: Theme.of(context).textTheme.titleSmall),
             if (subtitle != null) ...[
@@ -91,7 +134,12 @@ class ScreenHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+          Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 4),
           Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
         ],
@@ -101,7 +149,11 @@ class ScreenHeader extends StatelessWidget {
 }
 
 class ResponsiveGrid extends StatelessWidget {
-  const ResponsiveGrid({super.key, required this.children, this.minTileWidth = 180});
+  const ResponsiveGrid({
+    super.key,
+    required this.children,
+    this.minTileWidth = 180,
+  });
 
   final List<Widget> children;
   final double minTileWidth;

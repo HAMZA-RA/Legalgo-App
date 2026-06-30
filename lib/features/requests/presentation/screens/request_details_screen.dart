@@ -825,6 +825,8 @@ class _PaymentActionCard extends StatelessWidget {
         : 'Paiement en cours...';
 
     return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      color: AppColors.subtleSurface(context),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final compact = constraints.maxWidth < 560;
@@ -835,7 +837,7 @@ class _PaymentActionCard extends StatelessWidget {
                 retry ? 'Paiement à réessayer' : 'Paiement requis',
                 style: Theme.of(
                   context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: AppSpacing.xxs),
               Text(
@@ -876,8 +878,8 @@ class _PaymentActionCard extends StatelessWidget {
           return Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   color: AppColors.softIndigo.withValues(alpha: .10),
                   borderRadius: AppRadius.icon,
@@ -1035,10 +1037,14 @@ class _Summary extends StatelessWidget {
     final customer = request.customerName.isNotEmpty
         ? request.customerName
         : request.customerEmail;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return AppCard(
-      gradient: AppColors.heroGradient(context),
+      gradient: dark
+          ? AppColors.heroGradient(context)
+          : AppColors.primaryGradient,
       shadows: AppShadows.elevated(context),
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      borderColor: Colors.white.withValues(alpha: dark ? .08 : .22),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1049,15 +1055,15 @@ class _Summary extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .72),
+                  color: Colors.white.withValues(alpha: .14),
                   borderRadius: AppRadius.icon,
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: .72),
+                    color: Colors.white.withValues(alpha: .18),
                   ),
                 ),
                 child: const Icon(
                   Icons.description_outlined,
-                  color: AppColors.softIndigo,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -1073,13 +1079,14 @@ class _Summary extends StatelessWidget {
                           ?.copyWith(
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0,
+                            color: Colors.white,
                           ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
                       request.service?.title ?? 'Service indisponible',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Colors.white.withValues(alpha: .82),
                       ),
                     ),
                   ],
@@ -1221,11 +1228,12 @@ class _PackInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final pack = request.pack;
     return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               color: AppColors.teal.withValues(alpha: .10),
               borderRadius: AppRadius.icon,
@@ -1282,6 +1290,7 @@ class _Timeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1433,6 +1442,7 @@ class _DocumentsCard extends ConsumerWidget {
     }
 
     return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1571,14 +1581,29 @@ class _DocumentsCard extends ConsumerWidget {
         mimeType: file.mimeType,
       );
       messenger.showSnackBar(
-        SnackBar(content: Text('${file.fileName} téléchargé')),
+        SnackBar(
+          content: Text(
+            kIsWeb
+                ? '${file.fileName} téléchargé'
+                : 'Fichier enregistré dans Téléchargements',
+          ),
+        ),
       );
     } catch (error) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Échec du téléchargement : $error')),
+        SnackBar(content: Text(_downloadErrorMessage(error))),
       );
     }
   }
+}
+
+String _downloadErrorMessage(Object error) {
+  if (error.toString().contains(
+    'Fichier enregistré, mais aucune application compatible trouvée',
+  )) {
+    return 'Fichier enregistré, mais aucune application compatible trouvée';
+  }
+  return 'Échec du téléchargement';
 }
 
 class _MissingDocumentRow extends StatelessWidget {
@@ -1599,11 +1624,11 @@ class _MissingDocumentRow extends StatelessWidget {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.subtleSurface(context),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        color: AppColors.cardSurface(context),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.subtleBorder(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1614,14 +1639,12 @@ class _MissingDocumentRow extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.errorContainer.withValues(alpha: .55),
+                  color: AppColors.warning.withValues(alpha: .10),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.file_present_outlined,
-                  color: Theme.of(context).colorScheme.onErrorContainer,
+                  color: AppColors.warning,
                   size: 20,
                 ),
               ),
@@ -1697,10 +1720,11 @@ class _DocumentRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.subtleSurface(context),
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        color: AppColors.cardSurface(context),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.subtleBorder(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1865,10 +1889,11 @@ class _AnswerRow extends StatelessWidget {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.subtleSurface(context),
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        color: AppColors.cardSurface(context),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.subtleBorder(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

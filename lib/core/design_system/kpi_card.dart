@@ -26,7 +26,7 @@ class KpiCard extends StatelessWidget {
       builder: (context, constraints) {
         final compact =
             constraints.maxHeight < 172 || constraints.maxWidth < 180;
-        final iconSize = compact ? 36.0 : 42.0;
+        final iconSize = compact ? 34.0 : 42.0;
         final valueStyle =
             (compact
                     ? Theme.of(context).textTheme.titleLarge
@@ -40,7 +40,7 @@ class KpiCard extends StatelessWidget {
                 );
 
         return AppCard(
-          padding: EdgeInsets.all(compact ? AppSpacing.sm : AppSpacing.md),
+          padding: EdgeInsets.all(compact ? AppSpacing.sm : AppSpacing.lg),
           child: compact
               ? Row(
                   children: [
@@ -92,7 +92,7 @@ class KpiCard extends StatelessWidget {
                         _KpiAccentDot(accent: accent),
                       ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
                       value,
                       maxLines: 1,

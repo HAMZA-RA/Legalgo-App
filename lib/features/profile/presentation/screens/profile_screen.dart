@@ -281,9 +281,13 @@ class _ProfileHero extends StatelessWidget {
     final initial = user.email.isEmpty
         ? 'L'
         : user.email.characters.first.toUpperCase();
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return AppCard(
-      gradient: AppColors.heroGradient(context),
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      gradient: dark
+          ? AppColors.heroGradient(context)
+          : AppColors.primaryGradient,
+      borderColor: Colors.white.withValues(alpha: dark ? .08 : .22),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       shadows: AppShadows.elevated(context),
       child: Stack(
         children: [
@@ -312,9 +316,11 @@ class _ProfileHero extends StatelessWidget {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
+                      color: Colors.white.withValues(alpha: .16),
                       shape: BoxShape.circle,
-                      boxShadow: AppShadows.soft(context),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: .20),
+                      ),
                     ),
                     child: Center(
                       child: Text(
@@ -338,6 +344,7 @@ class _ProfileHero extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(
+                                color: Colors.white,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0,
                               ),
@@ -348,7 +355,9 @@ class _ProfileHero extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: AppColors.textSecondary),
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: .82),
+                              ),
                         ),
                       ],
                     ),

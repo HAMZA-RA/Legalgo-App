@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+
+const _legalGoFavicon = 'assets/branding/legalgo_favicon.png';
 
 class LegalGoMark extends StatelessWidget {
   const LegalGoMark({super.key, this.compact = false});
@@ -8,30 +10,32 @@ class LegalGoMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final size = compact ? 36.0 : 44.0;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: compact ? 36 : 44,
-          height: compact ? 36 : 44,
+          width: size,
+          height: size,
           decoration: BoxDecoration(
-            color: scheme.primary,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
-          child: Icon(
-            Icons.balance_rounded,
-            color: scheme.onPrimary,
-            size: compact ? 20 : 24,
+          padding: EdgeInsets.all(compact ? 5 : 6),
+          child: Image.asset(
+            _legalGoFavicon,
+            fit: BoxFit.contain,
+            semanticLabel: 'LegalGo',
           ),
         ),
         const SizedBox(width: 12),
         Text(
           'LegalGo',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: scheme.onSurface,
-              ),
+            fontWeight: FontWeight.w800,
+            color: scheme.onSurface,
+          ),
         ),
       ],
     );

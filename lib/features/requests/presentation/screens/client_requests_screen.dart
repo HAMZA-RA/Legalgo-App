@@ -39,10 +39,53 @@ class ClientRequestsScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SectionHeader(
-                          title: 'Historique',
-                          subtitle:
-                              '${requests.length} demande(s) liée(s) à votre compte',
+                        AppCard(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: AppColors.softIndigo.withValues(
+                                    alpha: .10,
+                                  ),
+                                  borderRadius: AppRadius.icon,
+                                ),
+                                child: const Icon(
+                                  Icons.folder_copy_outlined,
+                                  color: AppColors.softIndigo,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Historique',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.xxs),
+                                    Text(
+                                      '${requests.length} demande(s) liées à votre compte',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textSecondary,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         if (requests.isEmpty)

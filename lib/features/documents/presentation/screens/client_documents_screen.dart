@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:legalgo_mobile/core/design_system/design_system.dart';
@@ -54,10 +55,53 @@ class ClientDocumentsScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SectionHeader(
-                          title: 'Coffre documentaire',
-                          subtitle:
-                              '${documents.length} fichier(s) lié(s) à vos demandes LegalGo',
+                        AppCard(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: AppColors.softIndigo.withValues(
+                                    alpha: .10,
+                                  ),
+                                  borderRadius: AppRadius.icon,
+                                ),
+                                child: const Icon(
+                                  Icons.folder_copy_outlined,
+                                  color: AppColors.softIndigo,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Coffre documentaire',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.xxs),
+                                    Text(
+                                      '${documents.length} fichier(s) liés à vos demandes LegalGo',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textSecondary,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         if (documents.isEmpty)
@@ -107,14 +151,29 @@ class ClientDocumentsScreen extends ConsumerWidget {
         mimeType: file.mimeType,
       );
       messenger.showSnackBar(
-        SnackBar(content: Text('${file.fileName} téléchargé')),
+        SnackBar(
+          content: Text(
+            kIsWeb
+                ? '${file.fileName} téléchargé'
+                : 'Fichier enregistré dans Téléchargements',
+          ),
+        ),
       );
     } catch (error) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Échec du téléchargement : $error')),
+        SnackBar(content: Text(_downloadErrorMessage(error))),
       );
     }
   }
+}
+
+String _downloadErrorMessage(Object error) {
+  if (error.toString().contains(
+    'Fichier enregistré, mais aucune application compatible trouvée',
+  )) {
+    return 'Fichier enregistré, mais aucune application compatible trouvée';
+  }
+  return 'Échec du téléchargement';
 }
 
 class _DocumentsList extends StatelessWidget {
@@ -166,11 +225,12 @@ class _DocumentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [
           Container(
-            width: 46,
-            height: 46,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               color: AppColors.softIndigo.withValues(alpha: .10),
               borderRadius: AppRadius.icon,
@@ -192,15 +252,16 @@ class _DocumentCard extends StatelessWidget {
                         document.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w900),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     StatusBadge(value: document.status, compact: true),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: 2),
                 Text(
                   document.originalName ?? document.type,
                   maxLines: 1,

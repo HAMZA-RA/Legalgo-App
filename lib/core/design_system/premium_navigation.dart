@@ -43,20 +43,20 @@ class PremiumBottomNavigation extends StatelessWidget {
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md,
+          AppSpacing.lg,
           AppSpacing.xs,
-          AppSpacing.md,
+          AppSpacing.lg,
           AppSpacing.md,
         ),
         child: Container(
-          height: 72,
+          height: 68,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xs,
             vertical: AppSpacing.xs,
           ),
           decoration: BoxDecoration(
             color: AppColors.cardSurface(context),
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(26),
             border: Border.all(color: AppColors.subtleBorder(context)),
             boxShadow: AppShadows.elevated(context),
           ),
@@ -166,12 +166,12 @@ class _PremiumBottomNavItem extends StatelessWidget {
         curve: Curves.easeOut,
         height: double.infinity,
         margin: const EdgeInsets.symmetric(horizontal: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 3),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.softIndigo.withValues(alpha: .10)
+              ? AppColors.softIndigo.withValues(alpha: .12)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(18),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -179,7 +179,7 @@ class _PremiumBottomNavItem extends StatelessWidget {
             Icon(
               selected ? selectedIcon : icon,
               color: selected ? AppColors.softIndigo : AppColors.textMuted,
-              size: 22,
+              size: 21,
             ),
             const SizedBox(height: 3),
             SizedBox(

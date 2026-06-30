@@ -7,6 +7,8 @@ import 'package:legalgo_mobile/features/shared/domain/legalgo_models.dart';
 import 'package:legalgo_mobile/features/shared/presentation/providers/legalgo_providers.dart';
 import 'package:legalgo_mobile/features/shared/presentation/widgets/portal_widgets.dart';
 
+const _legalGoFavicon = 'assets/branding/legalgo_favicon.png';
+
 class ClientDashboardScreen extends ConsumerWidget {
   const ClientDashboardScreen({super.key});
 
@@ -46,85 +48,80 @@ class ClientDashboardScreen extends ConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(clientRequestsProvider),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.screenHorizontal,
-                    AppSpacing.xs,
-                    AppSpacing.screenHorizontal,
-                    AppSpacing.screenBottom,
-                  ),
-                  children: [
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 980),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _DashboardHero(
-                              total: requests.length,
-                              inProgress: inProgress,
-                              completed: completed,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenHorizontal,
+                AppSpacing.xs,
+                AppSpacing.screenHorizontal,
+                AppSpacing.screenBottom,
+              ),
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 980),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _DashboardHero(
+                          total: requests.length,
+                          inProgress: inProgress,
+                          completed: completed,
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        _KpiGrid(
+                          items: [
+                            _KpiData(
+                              title: 'Demandes',
+                              value: '${requests.length}',
+                              icon: Icons.folder_copy_outlined,
+                              accent: AppColors.softIndigo,
                             ),
-                            const SizedBox(height: AppSpacing.lg),
-                            _KpiGrid(
-                              items: [
-                                _KpiData(
-                                  title: 'Demandes',
-                                  value: '${requests.length}',
-                                  icon: Icons.folder_copy_outlined,
-                                  accent: AppColors.softIndigo,
-                                ),
-                                _KpiData(
-                                  title: 'En cours',
-                                  value: '$inProgress',
-                                  icon: Icons.hourglass_top_rounded,
-                                  accent: AppColors.violet,
-                                ),
-                                _KpiData(
-                                  title: 'Terminées',
-                                  value: '$completed',
-                                  icon: Icons.check_circle_outline_rounded,
-                                  accent: AppColors.success,
-                                ),
-                                _KpiData(
-                                  title: 'À traiter',
-                                  value: '$pending',
-                                  icon: Icons.priority_high_rounded,
-                                  accent: AppColors.warning,
-                                ),
-                              ],
+                            _KpiData(
+                              title: 'En cours',
+                              value: '$inProgress',
+                              icon: Icons.hourglass_top_rounded,
+                              accent: AppColors.violet,
                             ),
-                            const SizedBox(height: AppSpacing.lg),
-                            SectionHeader(
-                              title: 'Demandes récentes',
-                              subtitle:
-                                  'Latest activity from your LegalGo workspace',
-                              actionLabel: recent.isEmpty ? null : 'View all',
-                              onAction: recent.isEmpty
-                                  ? null
-                                  : () => context.go('/client/requests'),
+                            _KpiData(
+                              title: 'Terminées',
+                              value: '$completed',
+                              icon: Icons.check_circle_outline_rounded,
+                              accent: AppColors.success,
                             ),
-                            const SizedBox(height: AppSpacing.md),
-                            if (recent.isEmpty)
-                              const _EmptyRequestsCard()
-                            else
-                              _RecentRequestsList(requests: recent),
-                            const SizedBox(height: AppSpacing.lg),
-                            _RecentActivityCard(
-                              total: requests.length,
-                              inProgress: inProgress,
-                              completed: completed,
-                              pending: pending,
+                            _KpiData(
+                              title: 'À traiter',
+                              value: '$pending',
+                              icon: Icons.priority_high_rounded,
+                              accent: AppColors.warning,
                             ),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: AppSpacing.lg),
+                        SectionHeader(
+                          title: 'Demandes récentes',
+                          subtitle: 'Les derniers dossiers de votre espace',
+                          actionLabel: recent.isEmpty ? null : 'Voir tout',
+                          onAction: recent.isEmpty
+                              ? null
+                              : () => context.go('/client/requests'),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        if (recent.isEmpty)
+                          const _EmptyRequestsCard()
+                        else
+                          _RecentRequestsList(requests: recent),
+                        const SizedBox(height: AppSpacing.lg),
+                        _RecentActivityCard(
+                          total: requests.length,
+                          inProgress: inProgress,
+                          completed: completed,
+                          pending: pending,
+                        ),
+                      ],
                     ),
-                  ],
-                );
-              },
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -148,31 +145,91 @@ class _DashboardHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return AppCard(
-      gradient: AppColors.heroGradient(context),
-      borderColor: Colors.white.withValues(alpha: dark ? .08 : .65),
+      gradient: dark
+          ? AppColors.heroGradient(context)
+          : AppColors.primaryGradient,
+      borderColor: Colors.white.withValues(alpha: dark ? .08 : .22),
       shadows: AppShadows.elevated(context),
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Stack(
         children: [
           Positioned(
-            right: -36,
-            top: -46,
+            right: -34,
+            top: -42,
             child: _GlowCircle(
-              color: AppColors.violet.withValues(alpha: .18),
+              color: Colors.white.withValues(alpha: .12),
               size: 142,
             ),
           ),
           Positioned(
-            right: 46,
-            bottom: -58,
+            right: 32,
+            bottom: -70,
             child: _GlowCircle(
-              color: AppColors.teal.withValues(alpha: .16),
+              color: AppColors.teal.withValues(alpha: .22),
               size: 156,
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Bonjour',
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: .86),
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          'Votre espace LegalGo',
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0,
+                              ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          'Suivez vos demandes, documents et paiements en un seul endroit.',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: .82),
+                                height: 1.35,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: .14),
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: .18),
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(8),
+                    child: Image.asset(
+                      _legalGoFavicon,
+                      fit: BoxFit.contain,
+                      semanticLabel: 'LegalGo',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
               _HeroMetrics(
                 total: total,
                 inProgress: inProgress,
@@ -199,15 +256,12 @@ class _HeroMetrics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: dark ? .08 : .68),
+        color: Colors.white.withValues(alpha: .16),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: dark ? .08 : .76),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: .22)),
       ),
       child: Row(
         children: [
@@ -243,16 +297,14 @@ class _HeroMetric extends StatelessWidget {
           value,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w900,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : AppColors.navy,
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: AppSpacing.xxs),
         Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: AppColors.textSecondary,
+            color: Colors.white.withValues(alpha: .74),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -270,7 +322,7 @@ class _HeroDivider extends StatelessWidget {
       width: 1,
       height: 36,
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      color: AppColors.subtleBorder(context),
+      color: Colors.white.withValues(alpha: .20),
     );
   }
 }
@@ -284,11 +336,7 @@ class _KpiGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 860
-            ? 4
-            : constraints.maxWidth >= 520
-            ? 2
-            : 2;
+        final columns = constraints.maxWidth >= 860 ? 4 : 2;
         final spacing = constraints.maxWidth >= 520
             ? AppSpacing.md
             : AppSpacing.sm;
@@ -301,7 +349,7 @@ class _KpiGrid extends StatelessWidget {
             for (final item in items)
               SizedBox(
                 width: cardWidth,
-                height: constraints.maxWidth >= 520 ? 158 : 138,
+                height: constraints.maxWidth >= 520 ? 148 : 126,
                 child: KpiCard(
                   title: item.title,
                   value: item.value,
@@ -374,6 +422,7 @@ class _RecentRequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
       onTap: () => context.go('/client/requests/${request.id}'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,8 +431,8 @@ class _RecentRequestCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
                   color: AppColors.softIndigo.withValues(alpha: .10),
                   borderRadius: AppRadius.icon,
@@ -391,7 +440,7 @@ class _RecentRequestCard extends StatelessWidget {
                 child: const Icon(
                   Icons.description_outlined,
                   color: AppColors.softIndigo,
-                  size: 20,
+                  size: 19,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -403,11 +452,11 @@ class _RecentRequestCard extends StatelessWidget {
                       request.reference,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xxs),
+                    const SizedBox(height: 2),
                     Text(
                       request.service?.title ?? 'Service indisponible',
                       maxLines: 1,
@@ -419,11 +468,11 @@ class _RecentRequestCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
+              const SizedBox(width: AppSpacing.xs),
               StatusBadge(value: request.status, compact: true),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Expanded(
@@ -447,6 +496,7 @@ class _RecentRequestCard extends StatelessWidget {
               const Icon(
                 Icons.chevron_right_rounded,
                 color: AppColors.textMuted,
+                size: 20,
               ),
             ],
           ),

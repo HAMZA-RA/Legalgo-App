@@ -13,13 +13,13 @@ class StatusBadge extends StatelessWidget {
     final color = statusBadgeColor(value);
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: compact ? 9 : 11,
-        vertical: compact ? 5 : 7,
+        horizontal: compact ? 8 : 11,
+        vertical: compact ? 4 : 7,
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .10),
         borderRadius: AppRadius.chip,
-        border: Border.all(color: color.withValues(alpha: .18)),
+        border: Border.all(color: color.withValues(alpha: .20)),
       ),
       child: Text(
         humanizeStatus(value),
@@ -27,7 +27,7 @@ class StatusBadge extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: color,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w900,
           letterSpacing: 0,
         ),
       ),

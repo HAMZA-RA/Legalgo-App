@@ -30,62 +30,83 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SectionHeader(
-                    title: 'Apparence',
-                    subtitle: 'Choisissez le thème utilisé sur cet appareil',
-                  ),
-                  const SizedBox(height: AppSpacing.md),
                   AppCard(
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: SegmentedButton<ThemeMode>(
-                        segments: const [
-                          ButtonSegment(
-                            value: ThemeMode.system,
-                            icon: Icon(Icons.brightness_auto_outlined),
-                            label: Text('Système'),
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SettingsHeader(
+                          icon: Icons.palette_outlined,
+                          color: AppColors.softIndigo,
+                          title: 'Apparence',
+                          subtitle:
+                              'Choisissez le thème utilisé sur cet appareil',
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        SizedBox(
+                          width: double.infinity,
+                          child: SegmentedButton<ThemeMode>(
+                            segments: const [
+                              ButtonSegment(
+                                value: ThemeMode.system,
+                                icon: Icon(Icons.brightness_auto_outlined),
+                                label: Text('Système'),
+                              ),
+                              ButtonSegment(
+                                value: ThemeMode.light,
+                                icon: Icon(Icons.light_mode_outlined),
+                                label: Text('Clair'),
+                              ),
+                              ButtonSegment(
+                                value: ThemeMode.dark,
+                                icon: Icon(Icons.dark_mode_outlined),
+                                label: Text('Sombre'),
+                              ),
+                            ],
+                            selected: {themeMode},
+                            onSelectionChanged: (selection) {
+                              ref
+                                  .read(themeControllerProvider.notifier)
+                                  .setMode(selection.first);
+                            },
                           ),
-                          ButtonSegment(
-                            value: ThemeMode.light,
-                            icon: Icon(Icons.light_mode_outlined),
-                            label: Text('Clair'),
-                          ),
-                          ButtonSegment(
-                            value: ThemeMode.dark,
-                            icon: Icon(Icons.dark_mode_outlined),
-                            label: Text('Sombre'),
-                          ),
-                        ],
-                        selected: {themeMode},
-                        onSelectionChanged: (selection) {
-                          ref
-                              .read(themeControllerProvider.notifier)
-                              .setMode(selection.first);
-                        },
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.xxl),
-                  const SectionHeader(
-                    title: 'Session',
-                    subtitle: 'Gérez l’accès à votre espace',
-                  ),
                   const SizedBox(height: AppSpacing.md),
                   AppCard(
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: authState.isLoading
-                            ? null
-                            : () async {
-                                await ref
-                                    .read(authControllerProvider.notifier)
-                                    .logout();
-                                if (context.mounted) context.go('/login');
-                              },
-                        icon: const Icon(Icons.logout_rounded),
-                        label: const Text('Se déconnecter'),
-                      ),
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _SettingsHeader(
+                          icon: Icons.logout_rounded,
+                          color: AppColors.danger,
+                          title: 'Session',
+                          subtitle: 'Gérez l’accès à votre espace',
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.danger,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: authState.isLoading
+                                ? null
+                                : () async {
+                                    await ref
+                                        .read(authControllerProvider.notifier)
+                                        .logout();
+                                    if (context.mounted) context.go('/login');
+                                  },
+                            icon: const Icon(Icons.logout_rounded),
+                            label: const Text('Se déconnecter'),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -94,6 +115,58 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SettingsHeader extends StatelessWidget {
+  const _SettingsHeader({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: .10),
+            borderRadius: AppRadius.icon,
+          ),
+          child: Icon(icon, color: color),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: AppSpacing.xxs),
+              Text(
+                subtitle,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

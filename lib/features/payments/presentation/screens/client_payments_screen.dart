@@ -70,9 +70,51 @@ class ClientPaymentsScreen extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: AppSpacing.xxl),
-                        const SectionHeader(
-                          title: 'Activité',
-                          subtitle: 'Paiements LegalGo liés à votre compte',
+                        AppCard(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: AppColors.teal.withValues(alpha: .10),
+                                  borderRadius: AppRadius.icon,
+                                ),
+                                child: const Icon(
+                                  Icons.receipt_long_outlined,
+                                  color: AppColors.teal,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Activité',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.xxs),
+                                    Text(
+                                      'Paiements LegalGo liés à votre compte',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textSecondary,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         if (payments.isEmpty)
@@ -187,11 +229,12 @@ class _PaymentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [
           Container(
-            width: 46,
-            height: 46,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               color: AppColors.softIndigo.withValues(alpha: .10),
               borderRadius: AppRadius.icon,
@@ -213,8 +256,9 @@ class _PaymentCard extends StatelessWidget {
                         money(payment.amount),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w900),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),

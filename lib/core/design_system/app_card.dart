@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:legalgo_mobile/core/design_system/app_colors.dart';
 import 'package:legalgo_mobile/core/design_system/app_radius.dart';
 import 'package:legalgo_mobile/core/design_system/app_shadows.dart';
@@ -30,7 +30,9 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = AppRadius.card;
     final decoration = BoxDecoration(
-      color: gradient == null ? (color ?? AppColors.cardSurface(context)) : null,
+      color: gradient == null
+          ? (color ?? AppColors.cardSurface(context))
+          : null,
       gradient: gradient,
       borderRadius: radius,
       border: Border.all(color: borderColor ?? AppColors.subtleBorder(context)),
@@ -50,11 +52,7 @@ class AppCard extends StatelessWidget {
       margin: margin,
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          borderRadius: radius,
-          onTap: onTap,
-          child: content,
-        ),
+        child: InkWell(borderRadius: radius, onTap: onTap, child: content),
       ),
     );
   }

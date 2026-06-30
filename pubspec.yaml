@@ -23,6 +23,8 @@ dependencies:
   url_launcher: ^6.3.1
   connectivity_plus: ^6.1.4
   intl: ^0.20.2
+  path_provider: ^2.1.5
+  open_filex: ^4.7.0
 
   # Keep payment UI implementation independent from backend checkout strategy.
   # LegalGo currently returns a Stripe Checkout URL, opened via url_launcher/webview.
@@ -35,8 +37,16 @@ dev_dependencies:
   build_runner: ^2.5.4
   freezed: ^3.0.6
   json_serializable: ^6.9.5
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/branding/legalgo_favicon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/branding/legalgo_favicon.png"
 
 flutter:
   uses-material-design: true
   assets:
     - assets/env/
+    - assets/branding/

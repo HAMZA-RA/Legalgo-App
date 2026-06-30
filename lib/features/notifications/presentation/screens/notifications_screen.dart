@@ -146,21 +146,27 @@ class _NotificationsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return AppCard(
-      gradient: AppColors.heroGradient(context),
+      gradient: dark
+          ? AppColors.heroGradient(context)
+          : AppColors.primaryGradient,
+      borderColor: Colors.white.withValues(alpha: dark ? .08 : .22),
       shadows: AppShadows.elevated(context),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(
         children: [
           Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.softIndigo.withValues(alpha: .12),
+              color: Colors.white.withValues(alpha: .14),
               borderRadius: AppRadius.icon,
+              border: Border.all(color: Colors.white.withValues(alpha: .18)),
             ),
             child: const Icon(
               Icons.notifications_active_outlined,
-              color: AppColors.softIndigo,
+              color: Colors.white,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -170,15 +176,16 @@ class _NotificationsHeader extends StatelessWidget {
               children: [
                 Text(
                   '$unreadCount non lue(s)',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
                   'Actualités des demandes, documents, paiements et abonnements.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: Colors.white.withValues(alpha: .78),
                   ),
                 ),
               ],
@@ -188,10 +195,14 @@ class _NotificationsHeader extends StatelessWidget {
           IconButton(
             tooltip: 'Tout marquer comme lu',
             onPressed: markingAll ? null : onMarkAll,
+            color: Colors.white,
             icon: markingAll
                 ? const SizedBox.square(
                     dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : const Icon(Icons.done_all_rounded),
           ),
@@ -216,6 +227,7 @@ class _NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
       onTap: loading ? null : onTap,
       color: notification.isRead
           ? AppColors.cardSurface(context)
@@ -272,6 +284,8 @@ class _NotificationCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   notification.message,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: scheme.onSurfaceVariant,
                     height: 1.4,

@@ -18,7 +18,7 @@ class ClientShellScreen extends ConsumerWidget {
   static const _primaryDestinations = [
     PremiumNavDestination(
       '/client/dashboard',
-      'Tableau de bord',
+      'Accueil',
       Icons.dashboard_outlined,
       Icons.dashboard_rounded,
     ),

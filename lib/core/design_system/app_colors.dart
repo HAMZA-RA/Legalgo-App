@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class AppColors {
   const AppColors._();
@@ -11,8 +11,8 @@ class AppColors {
 
   static const background = Color(0xFFF7F8FC);
   static const surface = Color(0xFFFFFFFF);
-  static const elevatedSurface = Color(0xFFFAFBFF);
-  static const border = Color(0xFFE8EAF3);
+  static const elevatedSurface = Color(0xFFFBFCFF);
+  static const border = Color(0xFFE9ECF5);
 
   static const navy = Color(0xFF111827);
   static const textSecondary = Color(0xFF667085);
@@ -23,19 +23,27 @@ class AppColors {
   static const danger = Color(0xFFF04438);
 
   static Color pageBackground(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark ? const Color(0xFF0B1020) : background;
+    return Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFF0B1020)
+        : background;
   }
 
   static Color cardSurface(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark ? const Color(0xFF141B2D) : surface;
+    return Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFF141B2D)
+        : surface;
   }
 
   static Color subtleSurface(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1B2438) : elevatedSurface;
+    return Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFF1B2438)
+        : elevatedSurface;
   }
 
   static Color subtleBorder(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark ? Colors.white.withValues(alpha: .08) : border;
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.white.withValues(alpha: .08)
+        : border;
   }
 
   static LinearGradient heroGradient(BuildContext context) {
@@ -49,7 +57,7 @@ class AppColors {
     return const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color(0xFFEEF2FF), Color(0xFFF8F5FF), Color(0xFFECFEFF)],
+      colors: [Color(0xFFF3F4FF), Color(0xFFF8F5FF), Color(0xFFEFFDFC)],
     );
   }
 
